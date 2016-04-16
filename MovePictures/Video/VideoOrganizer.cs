@@ -25,5 +25,17 @@ namespace OrganizeMedia.Photo
         {
             throw new NotImplementedException();
         }
+
+        public string SearchFolder
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

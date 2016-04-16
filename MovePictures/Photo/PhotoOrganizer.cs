@@ -17,11 +17,25 @@ namespace OrganizeMedia.Photo
 
         //value[0] would be kept filepath of dups
         private Dictionary<string, List<string>> duplicates = new Dictionary<string, List<string>>();
-
+        private string searchFolder = string.Empty;
         #region IMediaOrganizer members
+
+        public string SearchFolder
+        {
+            get
+            {
+                return searchFolder;
+            }
+            set
+            {
+                searchFolder = value;
+            }
+        }
+
         /// <summary>
         /// Logic: create dictionary of all photos in toFolder with key as (moddt+len)
-        ///  go through each fils in fromFolder and check if exist in toFolder based on key, if not copy
+        ///  go through each fils in fromFolder and check if exist in toFolder based on key, add to list of file to copy
+        ///  
         /// </summary>
         /// <param name="fromFolder"></param>
         /// <param name="toFolder"></param>

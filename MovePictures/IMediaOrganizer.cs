@@ -9,6 +9,7 @@ namespace OrganizeMedia
 
     public interface IMediaOrganizer
     {
+        string SearchFolder { get; set; }
         ListResult<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder);
         ListResult<string> GetDups(string folder);
         ScalarResult<int> CopyMedia(List<string> fromFiles, string toFolder);

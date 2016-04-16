@@ -11,6 +11,7 @@ namespace OrganizeMediaGUI.ViewModel
 {
     public class OrganizePhotoVM:BaseViewModel
     {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
                
         public string SearchFolder
         {
@@ -33,7 +34,7 @@ namespace OrganizeMediaGUI.ViewModel
         public List<string> FilesToCopy
         {
             get { return filesToCopy; }
-            set { filesToCopy = value; }
+            set { filesToCopy = value; Notify("FilesToCopy"); }
         }
         
 
@@ -51,7 +52,7 @@ namespace OrganizeMediaGUI.ViewModel
             get
             {
                 if (findFilesToCopyCommand == null)
-                    findFilesToCopyCommand = new DelegateCommand(GetMediaToCopy);
+                    findFilesToCopyCommand = new DelegateCommand(GetMediaToCopyAsync);
                 return findFilesToCopyCommand;
             }
         }
@@ -72,15 +73,42 @@ namespace OrganizeMediaGUI.ViewModel
 
 
 
-        async private void GetMediaToCopy(object param)
+        async private void GetMediaToCopyAsync(object param)
         {
-            
-            IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
-            ListResult<string> res = await Task.FromResult<ListResult<string>>(mediaOrganizer.GetListOfNewMediaMissingInToFolder(fromFolder, toFolder));
 
-            FilesToCopy = res.ResultCollection.ToList<string>();
+            var res = await GetMediaToCopyAsync(FromFolder,ToFolder);
+            
+            if(res.Errors.Count > 0)
+            {
+
+            }
+            else
+            {
+                FilesToCopy = res.ResultCollection.ToList<string>();
+            }
 
         }
+        async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to,string searchFolder)
+        {
+            try
+            {
+                IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
+                mediaOrganizer.SearchFolder = searchFolder;
+                ListResult<string> res = await Task.FromResult<ListResult<string>>(mediaOrganizer.GetListOfNewMediaMissingInToFolder(from, to));
+
+                return res;
+            }
+            catch(Exception e)
+            {
+                Log.Error(e);
+                ListResult<string> emptyRes = new ListResult<string>();
+                emptyRes.Errors.Add("Failed To Get new media");
+                return emptyRes;
+
+            }
+
+        }
+
         
         //private async Task<ListResult<string>> GetListOfNewMediaMissingInToFolder(string fromFolder,string toFolder)
         //{
