@@ -138,12 +138,12 @@ namespace OrganizeMedia.Photo
         }
 
 
-        public ListResult<string> GetDups(string folder)
+        public ListResult<string> GetDups(string folder,IList<string> ignoreFolders)
         {
             throw new NotImplementedException();
         }
 
-        public ScalarResult<int> CopyMedia(List<string> fromFiles, string toFolder)
+        public ScalarResult<int> CopyMedia(IList<string> fromFiles, string toFolder)
         {
             throw new NotImplementedException();
         }

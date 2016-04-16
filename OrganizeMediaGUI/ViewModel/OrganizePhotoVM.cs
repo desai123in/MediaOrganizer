@@ -88,7 +88,7 @@ namespace OrganizeMediaGUI.ViewModel
             }
 
         }
-        async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to,string searchFolder)
+        async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to)
         {
             try
             {

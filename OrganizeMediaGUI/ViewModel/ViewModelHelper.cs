@@ -10,6 +10,10 @@ namespace OrganizeMediaGUI.ViewModel
 {
     public class BaseViewModel:INotifyPropertyChanged
     {
+        static BaseViewModel()
+        {
+            log4net.Config.XmlConfigurator.Configure();
+        }
         #region INotifyPropertyChanged Members
 
         /// <summary>

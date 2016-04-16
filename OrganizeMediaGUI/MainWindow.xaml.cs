@@ -70,10 +70,10 @@ namespace OrganizeMediaGUI
                 openFolderDialog.RootFolder = Environment.SpecialFolder.MyComputer;
             DialogResult result = openFolderDialog.ShowDialog();
             if(result == System.Windows.Forms.DialogResult.OK)
-            {
-                
+            {                
                 textBox.Text = openFolderDialog.SelectedPath;
-                //vm.SearchFolder = openFolderDialog.SelectedPath;
+                //this will require to update viewmodel property
+                BindingOperations.GetBindingExpression(textBox, System.Windows.Controls.TextBox.TextProperty).UpdateSource();                
             }
             
         }
