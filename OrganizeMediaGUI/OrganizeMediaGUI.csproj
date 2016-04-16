@@ -100,6 +100,12 @@
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MovePictures\OrganizeMedia.csproj">
+      <Project>{41b96fb1-a8e2-464a-af5a-47218320cf28}</Project>
+      <Name>OrganizeMedia</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

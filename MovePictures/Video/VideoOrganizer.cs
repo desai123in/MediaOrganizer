@@ -10,20 +10,20 @@ namespace OrganizeMedia.Photo
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-        public IList<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder)
+        public ListResult<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder)
         {
             throw new NotImplementedException();
         }
 
 
-        public IList<string> GetDups(string folder)
+        public ListResult<string> GetDups(string folder)
         {
             throw new NotImplementedException();
         }
 
-        public int CopyMedia(List<string> fromFiles, string toFolder)
+        public ScalarResult<int> CopyMedia(List<string> fromFiles, string toFolder)
         {
-            return 0;
+            throw new NotImplementedException();
         }
     }
 }

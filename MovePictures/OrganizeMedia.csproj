@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\Helper.cs" />
     <Compile Include="IMediaOrganizer.cs" />
     <Compile Include="Photo\PhotoOrganizer.cs" />
     <Compile Include="PhotoVideoOrganizer.cs" />

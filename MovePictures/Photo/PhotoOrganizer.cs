@@ -26,13 +26,20 @@ namespace OrganizeMedia.Photo
         /// <param name="fromFolder"></param>
         /// <param name="toFolder"></param>
         /// <returns></returns>
-        public IList<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder)
+        public ListResult<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder)
         {
+            var result = new ListResult<string>();
+            result.Errors = new List<string>();
+            result.Logs = new List<string>();
+
+
             IEnumerable<FileInfo> allToFilesInfo = null; 
             Dictionary<string, string> uniqToFiles = new Dictionary<string, string>();
 
             IEnumerable<FileInfo> allFromFilesInfo = null;
             List<string> filesToMove = new List<string>();
+
+            result.ResultCollection = filesToMove;
 
             try
             {
@@ -108,21 +115,23 @@ namespace OrganizeMedia.Photo
             catch (Exception e)
             {
                 Log.Error(e);
-                return null;
+                result.Errors.Add(string.Format("Unable to get new files to copy, Error: {0}",e.Message));
+                return result;
             }
+                       
 
-            return filesToMove;
+            return result;
         }
 
 
-        public IList<string> GetDups(string folder)
+        public ListResult<string> GetDups(string folder)
         {
             throw new NotImplementedException();
         }
 
-        public int CopyMedia(List<string> fromFiles, string toFolder)
+        public ScalarResult<int> CopyMedia(List<string> fromFiles, string toFolder)
         {
-            return 0;
+            throw new NotImplementedException();
         }
 
         #endregion

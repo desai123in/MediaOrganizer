@@ -28,8 +28,9 @@ namespace PictureOrganizerTests
             var to = @"C:\Users\Dharmesh\Pictures\";
             IMediaOrganizer photoOrganizer = new PhotoOrganizer();
 
-            IList<string> newFilesToCopy = photoOrganizer.GetListOfNewMediaMissingInToFolder(from, to);
+            var newFilesToCopy = photoOrganizer.GetListOfNewMediaMissingInToFolder(from, to);
 
+            Assert.AreEqual(0, newFilesToCopy.Errors.Count);
 
             //Assert.Equals(0, pvo.BackupPictures());
         }

@@ -9,8 +9,26 @@ namespace OrganizeMedia
 
     public interface IMediaOrganizer
     {
-        IList<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder);
-        IList<string> GetDups(string folder);
-        int CopyMedia(List<string> fromFiles, string toFolder);
+        ListResult<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder);
+        ListResult<string> GetDups(string folder);
+        ScalarResult<int> CopyMedia(List<string> fromFiles, string toFolder);
+    }
+
+    public abstract class Result
+    {
+        public IList<string> Errors{ get; set; }
+        public IList<string> Logs { get; set; }
+
+    }
+
+    public class ListResult<T>:Result
+    {
+        public IList<T> ResultCollection { get; set; } 
+        
+    }
+
+    public class ScalarResult<T>:Result
+    {
+        public T ResultValue { get; set; }
     }
 }
