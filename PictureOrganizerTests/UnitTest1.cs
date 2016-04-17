@@ -4,6 +4,8 @@ using OrganizeMedia;
 using OrganizeMedia.Photo;
 using System.Collections.Generic;
 using log4net;
+using System.Linq;
+using OrganizeMediaGUI.UserSettings;
 
 namespace PictureOrganizerTests
 {
@@ -14,6 +16,34 @@ namespace PictureOrganizerTests
         {
             log4net.Config.XmlConfigurator.Configure();
         }
+
+        [TestMethod]
+        public void TestSettingsManagement()
+        {
+            SettingsManager manager = new SettingsManager();
+
+            var initSettings = manager.InitializedSettings;
+
+            var photoScreen = initSettings.Screens.Where(scr => scr.Name.Equals(Screen.OrganizePhotoScreenName)).FirstOrDefault();
+
+            var searchFolderSetting = photoScreen.SettingsForScreen.Where(s => s.Name.Equals("SearchFolder")).FirstOrDefault();
+
+            searchFolderSetting.Value = @"c:\users\dharmesh\pictures\";
+
+
+            var retVal = manager.SaveSettings(initSettings);
+
+            Assert.AreEqual(true, retVal);
+
+            var deserializedSettingValue = manager.GetSettingValue(Screen.OrganizePhotoScreenName, "SearchFolder");
+
+
+            Assert.AreEqual(searchFolderSetting.Value, deserializedSettingValue);
+
+
+
+        }
+
         [TestMethod]
         public void TestMethod1()
         {

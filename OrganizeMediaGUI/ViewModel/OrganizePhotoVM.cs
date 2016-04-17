@@ -6,13 +6,15 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using OrganizeMedia;
 using OrganizeMedia.Photo;
+using OrganizeMediaGUI.UserSettings;
 
 namespace OrganizeMediaGUI.ViewModel
 {
-    public class OrganizePhotoVM:BaseViewModel
+    public class OrganizePhotoVM:BaseViewModel,IDisposable
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
                
+
         public string SearchFolder
         {
             get { return searchFolder; }
@@ -63,12 +65,21 @@ namespace OrganizeMediaGUI.ViewModel
         private List<string> filesToCopy;
         private DelegateCommand browseCommand;
         private DelegateCommand findFilesToCopyCommand;
+        private SettingsManager settingsManager = new SettingsManager();
+        
         public Action<object> BrowseAction;
+
         
 
         public OrganizePhotoVM()
         {
-            //browseCommand = new DelegateCommand(BrowseAction);
+            //get user settings, previously used value in folder paths
+
+            SearchFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "SearchFolder");
+            FromFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "FromFolder");
+            ToFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder");
+
+            
         }
 
 
@@ -124,7 +135,22 @@ namespace OrganizeMediaGUI.ViewModel
 
         //}
 
+        ~OrganizePhotoVM()
+        {
+            Log.Info("Saving setting from PhotoViewModel");
 
+            //save settings            
+            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "SearchFolder", SearchFolder);
+            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "FromFolder", FromFolder);
+            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder", ToFolder);
+            //Dispose();
+        }
+
+
+        public void Dispose()
+        {
+            
+        }
     }
 
 

@@ -62,6 +62,10 @@
       <Project>{41b96fb1-a8e2-464a-af5a-47218320cf28}</Project>
       <Name>OrganizeMedia</Name>
     </ProjectReference>
+    <ProjectReference Include="..\OrganizeMediaGUI\OrganizeMediaGUI.csproj">
+      <Project>{9321439c-3f2d-4bf6-bfce-e32428116992}</Project>
+      <Name>OrganizeMediaGUI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
