@@ -33,6 +33,7 @@ namespace OrganizeMediaGUI
             vm = new OrganizePhotoVM();
             vm.BrowseAction = BrowseFolder;
             this.DataContext = vm;
+            Closing += vm.Dispose;
 
         }
 

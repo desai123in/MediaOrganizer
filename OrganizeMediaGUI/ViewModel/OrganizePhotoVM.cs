@@ -7,10 +7,11 @@ using System.Windows.Input;
 using OrganizeMedia;
 using OrganizeMedia.Photo;
 using OrganizeMediaGUI.UserSettings;
+using System.ComponentModel;
 
 namespace OrganizeMediaGUI.ViewModel
 {
-    public class OrganizePhotoVM:BaseViewModel,IDisposable
+    public class OrganizePhotoVM:BaseViewModel
     {
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
                
@@ -135,21 +136,16 @@ namespace OrganizeMediaGUI.ViewModel
 
         //}
 
-        ~OrganizePhotoVM()
+
+
+        public void Dispose(object sender, CancelEventArgs e)
         {
             Log.Info("Saving setting from PhotoViewModel");
 
             //save settings            
             settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "SearchFolder", SearchFolder);
             settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "FromFolder", FromFolder);
-            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder", ToFolder);
-            //Dispose();
-        }
-
-
-        public void Dispose()
-        {
-            
+            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder", ToFolder); 
         }
     }
 
