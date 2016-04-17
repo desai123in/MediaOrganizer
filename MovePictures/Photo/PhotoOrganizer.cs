@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Configuration;
 
 namespace OrganizeMedia.Photo
 {
@@ -18,6 +19,7 @@ namespace OrganizeMedia.Photo
         //value[0] would be kept filepath of dups
         private Dictionary<string, List<string>> duplicates = new Dictionary<string, List<string>>();
         private string searchFolder = string.Empty;
+        private const string tempPathFolderAppsettingKey = "debugtemppath";
         #region IMediaOrganizer members
 
         public string SearchFolder
@@ -98,7 +100,20 @@ namespace OrganizeMedia.Photo
                     }
                 }
 
+
+                var issueFile = uniqToFiles.Values.Where(v => v.Contains("DSC_8091")).FirstOrDefault();
+                var issuekey = uniqToFiles.FirstOrDefault(kv => kv.Value.Equals(issueFile)).Key;
+
+                //for debugging
+                var uniqToFilesKeyValue = new List<string>();
+                foreach(var keyvalue in uniqToFiles)
+                {
+                    uniqToFilesKeyValue.Add(string.Format("{0}#{1}", keyvalue.Key, keyvalue.Value));
+                }
+
                 int totalNumOfDups = allToFilesInfo.Count() - uniqToFiles.Count;
+
+                
 
                 Log.InfoFormat("{0} dup image files found in fromFolder: {1}", totalNumOfDups, fromFolder);
 
@@ -108,6 +123,8 @@ namespace OrganizeMedia.Photo
 
                 //go through all fromFolder files, and if doesn't exist in uniqToFiles dict then copy 
                 int alreadyExistCount = 0;
+                //for debugging
+                var filesToMoveKeyValue = new List<string>();
                 foreach (var file in allFromFilesInfo)
                 {
                     var path = file.FullName;
@@ -117,6 +134,8 @@ namespace OrganizeMedia.Photo
                     if (!uniqToFiles.TryGetValue(key, out existingToPath))
                     {
                         filesToMove.Add(path);
+                        //for debugging
+                        filesToMoveKeyValue.Add(string.Format("{0}#{1}", key, path));
                     }
                     else
                     {
@@ -124,7 +143,33 @@ namespace OrganizeMedia.Photo
                     }
                 }
                 Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {0}", filesToMove.Count, fromFolder,toFolder);
-            }
+
+
+                //following code is for verification
+
+                try
+                {
+                    CreateDebugFiles(uniqToFilesKeyValue, "uniqInToFolder.txt");
+                    CreateDebugFiles(filesToMoveKeyValue, "toMove.txt");
+
+                    var issueFiles = uniqToFilesKeyValue.Where(u => filesToMoveKeyValue.Contains(GetFileNameFromkeyvalue(u))).Select(u => u);
+                    if (issueFiles.Count() > 0)
+                    {
+                        foreach (var val in issueFiles)
+                            Log.WarnFormat("Some issue in file matching:{0}", val);
+                    }
+                    else
+                    {
+                        Log.Info("No Issues in file matching based on filename");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Log.Warn("Error performing verfication");
+                    Log.Error(e);
+                }               
+
+            }         
 
             catch (Exception e)
             {
@@ -135,6 +180,43 @@ namespace OrganizeMedia.Photo
                        
 
             return result;
+        }
+
+        private string GetFileNameFromkeyvalue(string input )
+        {
+            try
+            {
+                  var filepath = input.Split('#')[1];
+                  var filename = Path.GetFileName(filepath);
+                  return filename;
+            }
+            catch (Exception e)
+            {
+                Log.Warn("Error splitting filename from keyvalue");
+                Log.Error(e);
+                return string.Empty;
+
+            }
+            
+
+        }
+
+        private void CreateDebugFiles(List<string> keyValueList, string fileName)
+        {
+            try
+            {
+                var tempPath = ConfigurationSettings.AppSettings[tempPathFolderAppsettingKey];
+
+                var filePath = Path.Combine(tempPath, fileName);
+                File.WriteAllLines(filePath, keyValueList);
+            }
+            catch (Exception e)
+            {
+                Log.WarnFormat("error creating debug files");
+                Log.Error(e);
+            }
+            
+
         }
 
 
