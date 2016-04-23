@@ -45,6 +45,22 @@ namespace PictureOrganizerTests
         }
 
         [TestMethod]
+        public void CopyFilesTest()
+        {
+            IMediaOrganizer photoOrganizer = new PhotoOrganizer();
+            List<string> files = new List<string>();
+
+            files.Add(@"F:\DCIM\100D3300\DSC_8218.JPG");
+            files.Add(@"F:\DCIM\100D3300\DSC_8217.JPG");
+            files.Add(@"F:\DCIM\100D3300\DSC_8216.JPG");
+
+            var result = photoOrganizer.CopyMedia(files, @"c:\temp\test");
+
+            Assert.AreEqual(3, result.ResultValue);
+
+        }
+
+        [TestMethod]
         public void TestMethod1()
         {
 

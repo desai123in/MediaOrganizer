@@ -20,6 +20,24 @@ namespace OrganizeMedia
         public IList<string> Errors{ get; set; }
         public IList<string> Logs { get; set; }
 
+
+        public void AddErrorFormat(string format,params object[] arguments)
+        {
+            ListAddFormat(Errors, format, arguments);
+        }
+
+        public void AddLogFormat(string format, params object[] arguments)
+        {
+            ListAddFormat(Logs, format, arguments);
+        }
+
+        private void ListAddFormat(IList<string> list,string format, params object[] arguments)
+        {
+            if (list != null)
+            {
+                list.Add(string.Format(format, arguments));
+            }
+        }
     }
 
     public class ListResult<T>:Result

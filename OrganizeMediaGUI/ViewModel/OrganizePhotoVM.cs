@@ -8,6 +8,8 @@ using OrganizeMedia;
 using OrganizeMedia.Photo;
 using OrganizeMediaGUI.UserSettings;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
+using ReactiveUI;
 
 namespace OrganizeMediaGUI.ViewModel
 {
@@ -34,7 +36,7 @@ namespace OrganizeMediaGUI.ViewModel
             set { toFolder = value; Notify("ToFolder"); }
         }
               
-        public List<string> FilesToCopy
+        public ObservableCollection<string> FilesToCopy
         {
             get { return filesToCopy; }
             set { filesToCopy = value; Notify("FilesToCopy"); }
@@ -60,14 +62,33 @@ namespace OrganizeMediaGUI.ViewModel
             }
         }
 
+       // public ReactiveCommand<ScalarResult<int>> CopyAllCommand { get; set; }
+        public DelegateCommand CopyAllCommand
+        {
+            get
+            {
+                if (copyAllCommand == null)
+                    copyAllCommand = new DelegateCommand(CopyMediaAsync);
+                return copyAllCommand;
+            }
+        }
+
+        public bool IsCopyExecuting
+        {
+            get { return isCopyExecuting; }
+            set { isCopyExecuting = value; Notify("IsCopyExecuting"); }
+        }
+
         private string searchFolder = string.Empty;
         private string fromFolder = "FromFolderTest";
         private string toFolder = "ToFolderTest";
-        private List<string> filesToCopy;
+        private ObservableCollection<string> filesToCopy;
         private DelegateCommand browseCommand;
         private DelegateCommand findFilesToCopyCommand;
+        private DelegateCommand copyAllCommand;
         private SettingsManager settingsManager = new SettingsManager();
-        
+        private bool isCopyExecuting = false;
+
         public Action<object> BrowseAction;
 
         
@@ -80,33 +101,67 @@ namespace OrganizeMediaGUI.ViewModel
             FromFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "FromFolder");
             ToFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder");
 
+            //CopyAllCommand = ReactiveCommand.CreateAsyncTask()
             
         }
 
-
+        async private void CopyMediaAsync(object param)
+        {
+            if(FilesToCopy.Count > 0)
+            {
+                IsCopyExecuting = true;
+                var res = await CopyMediaAsync(FilesToCopy.ToList<string>(), ToFolder);
+                FilesToCopy.Clear();
+                IsCopyExecuting = false;
+            }
+            //var res = await CopyMediaAsync
+        }
 
         async private void GetMediaToCopyAsync(object param)
         {
 
-            var res = await GetMediaToCopyAsync(FromFolder,ToFolder);
-            
-            if(res.Errors.Count > 0)
+            var res = await GetMediaToCopyAsync(FromFolder, ToFolder);
+
+            if (res.Errors != null && res.Errors.Count > 0)
             {
 
             }
             else
             {
-                FilesToCopy = res.ResultCollection.ToList<string>();
+                FilesToCopy = new ObservableCollection<string>(res.ResultCollection);
             }
 
         }
+
+        async private Task<ScalarResult<int>> CopyMediaAsync(IList<string> fromFiles, string toFolder)
+        {
+            try
+            {
+                IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
+
+                ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => { Task.Delay(5000).Wait(); return new ScalarResult<int>(); });//await Task.FromResult<ScalarResult<int>>(mediaOrganizer.CopyMedia(fromFiles, toFolder));
+                return res;
+                
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                ScalarResult<int> emptyRes = new ScalarResult<int>();
+                emptyRes.Errors.Add("Failed To Copy new media");
+                return emptyRes;
+            }
+
+        }
+
+        
         async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to)
         {
             try
             {
                 IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
                 mediaOrganizer.SearchFolder = searchFolder;
-                ListResult<string> res = await Task.FromResult<ListResult<string>>(mediaOrganizer.GetListOfNewMediaMissingInToFolder(from, to));
+                ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetListOfNewMediaMissingInToFolder(from, to));
+                    //await Task.Run<ListResult<string>>(() => { Task.Delay(5000).Wait(); return new ListResult<string>(); });
 
                 return res;
             }

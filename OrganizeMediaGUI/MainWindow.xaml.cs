@@ -65,6 +65,8 @@ namespace OrganizeMediaGUI
             var textBox = o as System.Windows.Controls.TextBox;
             //OpenFileDialog openFileDialog = new OpenFileDialog();
             FolderBrowserDialog openFolderDialog = new FolderBrowserDialog();
+
+            
             if(textBox.Name.Contains("Search"))
                 openFolderDialog.RootFolder = Environment.SpecialFolder.MyPictures;
             else

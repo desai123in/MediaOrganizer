@@ -48,8 +48,9 @@ namespace OrganizeMedia.Photo
             result.Errors = new List<string>();
             result.Logs = new List<string>();
 
+            Task.Delay(5000).Wait();
 
-            IEnumerable<FileInfo> allToFilesInfo = null; 
+            IEnumerable<FileInfo> allToFilesInfo = null;
             Dictionary<string, string> uniqToFiles = new Dictionary<string, string>();
 
             IEnumerable<FileInfo> allFromFilesInfo = null;
@@ -106,14 +107,14 @@ namespace OrganizeMedia.Photo
 
                 //for debugging
                 var uniqToFilesKeyValue = new List<string>();
-                foreach(var keyvalue in uniqToFiles)
+                foreach (var keyvalue in uniqToFiles)
                 {
                     uniqToFilesKeyValue.Add(string.Format("{0}#{1}", keyvalue.Key, keyvalue.Value));
                 }
 
                 int totalNumOfDups = allToFilesInfo.Count() - uniqToFiles.Count;
 
-                
+
 
                 Log.InfoFormat("{0} dup image files found in fromFolder: {1}", totalNumOfDups, fromFolder);
 
@@ -142,7 +143,7 @@ namespace OrganizeMedia.Photo
                         alreadyExistCount++;
                     }
                 }
-                Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {0}", filesToMove.Count, fromFolder,toFolder);
+                Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {0}", filesToMove.Count, fromFolder, toFolder);
 
 
                 //following code is for verification
@@ -167,28 +168,28 @@ namespace OrganizeMedia.Photo
                 {
                     Log.Warn("Error performing verfication");
                     Log.Error(e);
-                }               
+                }
 
-            }         
+            }
 
             catch (Exception e)
             {
                 Log.Error(e);
-                result.Errors.Add(string.Format("Unable to get new files to copy, Error: {0}",e.Message));
+                result.Errors.Add(string.Format("Unable to get new files to copy, Error: {0}", e.Message));
                 return result;
             }
-                       
+
 
             return result;
         }
 
-        private string GetFileNameFromkeyvalue(string input )
+        private string GetFileNameFromkeyvalue(string input)
         {
             try
             {
-                  var filepath = input.Split('#')[1];
-                  var filename = Path.GetFileName(filepath);
-                  return filename;
+                var filepath = input.Split('#')[1];
+                var filename = Path.GetFileName(filepath);
+                return filename;
             }
             catch (Exception e)
             {
@@ -197,7 +198,7 @@ namespace OrganizeMedia.Photo
                 return string.Empty;
 
             }
-            
+
 
         }
 
@@ -215,19 +216,45 @@ namespace OrganizeMedia.Photo
                 Log.WarnFormat("error creating debug files");
                 Log.Error(e);
             }
-            
+
 
         }
 
 
-        public ListResult<string> GetDups(string folder,IList<string> ignoreFolders)
+        public ListResult<string> GetDups(string folder, IList<string> ignoreFolders)
         {
             throw new NotImplementedException();
         }
 
         public ScalarResult<int> CopyMedia(IList<string> fromFiles, string toFolder)
         {
-            throw new NotImplementedException();
+            ScalarResult<int> result = new ScalarResult<int>();
+            result.Logs = new List<string>();
+            result.Errors = new List<string>();
+
+            
+            int numFilesCopied = 0;
+
+            foreach (string filePath in fromFiles)
+            {
+                var fileName = Path.GetFileName(filePath);
+                try
+                {
+                    File.Copy(filePath, Path.Combine(toFolder,fileName), true);
+                    numFilesCopied++;
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e);
+                    result.AddErrorFormat("Could not copy file: {0}", filePath);
+                }
+            }
+
+            result.ResultValue = numFilesCopied;
+            result.AddLogFormat("{0} out of {1} files copied succesfully.", numFilesCopied, fromFiles.Count);
+
+            return result;
+
         }
 
         #endregion
