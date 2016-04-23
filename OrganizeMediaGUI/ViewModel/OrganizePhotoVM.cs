@@ -46,7 +46,18 @@ namespace OrganizeMediaGUI.ViewModel
             get { return filesToCopy; }
             set { filesToCopy = value; Notify("FilesToCopy"); }
         }
-        
+
+        public ObservableCollection<string> DupFiles
+        {
+            get { return dupFiles; }
+            set { dupFiles = value; Notify("DupFiles"); }
+        }
+
+        public bool ExcludeSearchFolderDups
+        {
+            get { return excludeSearchFolderDups; }
+            set { excludeSearchFolderDups = value; Notify("ExcludeSearchFolderDups"); }
+        }
 
         public DelegateCommand BrowseCommand
         {
@@ -90,16 +101,21 @@ namespace OrganizeMediaGUI.ViewModel
             set { isGetExecuting = value; Notify("isGetExecuting"); }
         }
 
+        public string Logs { get { return logs; } set { logs = value; Notify("Logs"); } }
+
         private string searchFolder = string.Empty;
         private string fromFolder = "FromFolderTest";
         private string toFolder = "ToFolderTest";
         private ObservableCollection<string> filesToCopy;
+        private ObservableCollection<string> dupFiles;
         private DelegateCommand browseCommand;
         private DelegateCommand findFilesToCopyCommand;
         private DelegateCommand copyAllCommand;
         private SettingsManager settingsManager = new SettingsManager();
         private bool isCopyExecuting = false;
         private bool isGetExecuting = false;
+        private string logs = string.Empty;
+        private bool excludeSearchFolderDups;
 
         public Action<object> BrowseAction;
 
@@ -114,6 +130,7 @@ namespace OrganizeMediaGUI.ViewModel
             ToFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder");
 
             filesToCopy = new ObservableCollection<string>();
+            dupFiles = new ObservableCollection<string>();
             //filesToCopy.Add("test1");
             //filesToCopy.Add("test2");
             //CopyAllCommand = ReactiveCommand.CreateAsyncTask()
@@ -133,11 +150,18 @@ namespace OrganizeMediaGUI.ViewModel
 
         async private void CopyMediaAsync(object param)
         {
+            
             if(FilesToCopy.Count > 0)
             {
+                var lFilesToCopy = FilesToCopy.ToList<string>();
                 IsCopyExecuting = true;
                
-                var res = await CopyMediaAsync(FilesToCopy.ToList<string>(), ToFolder);
+                if(ExcludeSearchFolderDups)
+                {
+                    lFilesToCopy.RemoveAll(f => DupFiles.Contains(f));
+                }
+
+                var res = await CopyMediaAsync(lFilesToCopy, ToFolder);
                 FilesToCopy.Clear();
                 //back on UI Thread
                 IsCopyExecuting = false;
@@ -151,17 +175,32 @@ namespace OrganizeMediaGUI.ViewModel
         async private void GetMediaToCopyAsync(object param)
         {
             IsGetExecuting = true;
+            Logs = string.Empty;
             FilesToCopy.Clear();
+            DupFiles.Clear();
             var res = await GetMediaToCopyAsync(FromFolder, ToFolder);
 
             if (res.Errors != null && res.Errors.Count > 0)
             {
-
+                Logs = FormatLogString(res.Errors);
             }
             else
             {
                 FilesToCopy = new ObservableCollection<string>(res.ResultCollection);
+                Logs = FormatLogString(res.Logs);
             }
+
+            var resSearchFolderdups = await GetDuplicateMediaAsync(FromFolder, SearchFolder);
+            if (res.Errors != null && res.Errors.Count > 0)
+            {
+                Logs = FormatLogString(res.Errors);
+            }
+            else
+            {
+                DupFiles = new ObservableCollection<string>(resSearchFolderdups.ResultCollection);
+                Logs = FormatLogString(resSearchFolderdups.Logs);
+            }
+
             IsGetExecuting = false;
             //below needed to update button enable/disable otherwise its not enabling sometime without clicking on ui
             CommandManager.InvalidateRequerySuggested();
@@ -204,7 +243,26 @@ namespace OrganizeMediaGUI.ViewModel
             return new ScalarResult<int>(); 
         }
 
-        
+        async private Task<ListResult<string>> GetDuplicateMediaAsync(string from,string searchFolder)
+        {
+            try
+            {
+                IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
+                mediaOrganizer.SearchFolder = searchFolder;
+               ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetDups(from,null)).ConfigureAwait(false);
+                //await Task.Run<ListResult<string>>(() => { Task.Delay(5000).Wait(); return new ListResult<string>(); });
+
+                return res;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                ListResult<string> emptyRes = new ListResult<string>();
+                emptyRes.Errors.Add("Failed To Get duplicates");
+                return emptyRes;
+
+            }
+        }
         async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to)
         {
             try
@@ -225,6 +283,21 @@ namespace OrganizeMediaGUI.ViewModel
 
             }
 
+        }
+
+        private string FormatLogString(IList<string> values)
+        {
+            StringBuilder sb = new StringBuilder();
+            if(!string.IsNullOrEmpty(Logs))
+            {
+                sb.Append(Logs);
+            }
+            
+            foreach(string s in values)
+            {
+                sb.AppendLine(s);
+            }
+            return sb.ToString();
         }
 
         

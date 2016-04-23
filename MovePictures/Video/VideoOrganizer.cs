@@ -16,7 +16,7 @@ namespace OrganizeMedia.Photo
         }
 
 
-        public ListResult<string> GetDups(string folder,IList<string> ignoreFolders)
+        public ListResult<string> GetDups(string fromFolder,IList<string> ignoreFolders)
         {
             throw new NotImplementedException();
         }

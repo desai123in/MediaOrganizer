@@ -11,7 +11,7 @@ namespace OrganizeMedia
     {
         string SearchFolder { get; set; }
         ListResult<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder);
-        ListResult<string> GetDups(string searchfolder,IList<string> ignoreFolders);
+        ListResult<string> GetDups(string fromFolder, IList<string> ignoreFolders);
         ScalarResult<int> CopyMedia(IList<string> fromFiles, string toFolder);
     }
 

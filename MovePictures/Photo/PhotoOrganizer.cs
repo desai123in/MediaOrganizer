@@ -35,6 +35,109 @@ namespace OrganizeMedia.Photo
         }
 
         /// <summary>
+        /// get images already exist in SearchFolder
+        /// todo: take ignore folders into account
+        /// </summary>
+        /// <param name="fromFolder">input images</param>
+        /// <param name="ignoreFolders">any folder which should be ignored while searching</param>
+        /// <returns></returns>
+        public ListResult<string> GetDups(string fromFolder, IList<string> ignoreFolders)
+        {
+            var result = new ListResult<string>();
+            result.Errors = new List<string>();
+            result.Logs = new List<string>();
+
+            if(string.IsNullOrEmpty(SearchFolder))
+            {
+                result.AddErrorFormat("SearchFolder is not Set");
+                return result;
+            }
+            
+            IEnumerable<FileInfo> allSearchFolderFilesInfo = null;
+            Dictionary<string, string> uniqSearchFolderFiles = new Dictionary<string, string>();
+            List<string> filesAlreadyExistsInSearchFolder = new List<string>();
+
+            IEnumerable<FileInfo> allFromFilesInfo = null;
+
+            result.ResultCollection = filesAlreadyExistsInSearchFolder;
+
+
+            try
+            {
+
+                //get file informations about all the photo files in toFolder
+                allSearchFolderFilesInfo = GetFilesInfoFromFolder(SearchFolder);
+                Log.InfoFormat("{0} image files found in toFolder: {1}", allSearchFolderFilesInfo.Count(), SearchFolder);
+
+                foreach (var fileInfo in allSearchFolderFilesInfo)
+                {
+                    var filePath = fileInfo.FullName;
+                    var key = GetFileKey(filePath);
+
+                    string existingValue;
+                    if (uniqSearchFolderFiles.TryGetValue(key, out existingValue))
+                    {
+                        //its duplicate
+                        List<string> dupFiles;
+
+                        //if key is already created then add this key's another dup value
+                        if (duplicates.TryGetValue(key, out dupFiles))
+                        {
+                            //this will be 3rd,4th,5th.. value of dup
+                            dupFiles.Add(filePath);
+                        }
+                        else
+                        {
+                            dupFiles = new List<string>();
+                            //0th element is the 1st value of dup we kept in uniqToFiles
+                            dupFiles.Add(existingValue);
+                            //this will be 2nd value of dup
+                            dupFiles.Add(filePath);
+                            duplicates.Add(key, dupFiles);
+                        }
+                    }
+                    else
+                    {
+                        uniqSearchFolderFiles[key] = filePath;
+                    }
+                
+                }
+
+                //duplicate images in SearchFolder (this is just for info.. 
+                int totalNumOfDups = allSearchFolderFilesInfo.Count() - uniqSearchFolderFiles.Count;
+                //now we have all uniq files in toFolder in uniqToFiles dict, and all dups with all their occurences in dupFiles dict.
+                
+                allFromFilesInfo = GetFilesInfoFromFolder(fromFolder);
+                foreach (var file in allFromFilesInfo)
+                {
+                    var path = file.FullName;
+                    var key = GetFileKey(path);
+
+                    var existingToPath = string.Empty;
+                    if (!uniqSearchFolderFiles.TryGetValue(key, out existingToPath))
+                    {
+                        filesAlreadyExistsInSearchFolder.Add(path);
+                        
+                    }
+                   
+                }
+                Log.InfoFormat("{0} image files found in SearchFolder: {1} from fromFolder: {2}", filesAlreadyExistsInSearchFolder.Count, SearchFolder, fromFolder);
+                result.AddLogFormat("{0} Photos Already Exists In : {1}", filesAlreadyExistsInSearchFolder.Count, SearchFolder, fromFolder);
+
+            }
+            catch(Exception e)
+            {
+                Log.Error(e);
+                result.Errors.Add(string.Format("Unable to get duplicate files, Error: {0}", e.Message));
+                return result;
+            }
+
+                //value[0] would be kept filepath of dups
+
+            return result;
+        }
+
+        /// <summary>
         /// Logic: create dictionary of all photos in toFolder with key as (moddt+len)
         ///  go through each fils in fromFolder and check if exist in toFolder based on key, add to list of file to copy
         ///  
@@ -48,8 +151,7 @@ namespace OrganizeMedia.Photo
             result.Errors = new List<string>();
             result.Logs = new List<string>();
 
-            Task.Delay(5000).Wait();
-
+            
             IEnumerable<FileInfo> allToFilesInfo = null;
             Dictionary<string, string> uniqToFiles = new Dictionary<string, string>();
 
@@ -143,8 +245,8 @@ namespace OrganizeMedia.Photo
                         alreadyExistCount++;
                     }
                 }
-                Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {0}", filesToMove.Count, fromFolder, toFolder);
-
+                Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {2}", filesToMove.Count, fromFolder, toFolder);
+                result.AddLogFormat("{0} new image files found in : {1} which does not exist in : {2}", filesToMove.Count, fromFolder, toFolder);
 
                 //following code is for verification
 
@@ -221,10 +323,7 @@ namespace OrganizeMedia.Photo
         }
 
 
-        public ListResult<string> GetDups(string folder, IList<string> ignoreFolders)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public ScalarResult<int> CopyMedia(IList<string> fromFiles, string toFolder)
         {
