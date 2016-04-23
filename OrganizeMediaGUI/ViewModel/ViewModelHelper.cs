@@ -64,15 +64,30 @@ namespace OrganizeMediaGUI.ViewModel
             return result;
         }
 
-        public event EventHandler CanExecuteChanged;
+        public event EventHandler CanExecuteChanged
+        {
+            add
+            {
+                //_internalCanExecuteChanged += value;
+                CommandManager.RequerySuggested += value;
+            }
+            remove
+            {
+                //_internalCanExecuteChanged -= value;
+                CommandManager.RequerySuggested -= value;
+            }
+        }
+
+        //public event EventHandler CanExecuteChanged;
 
         public void RaiseCanExecuteChanged()
         {
-            EventHandler handler = this.CanExecuteChanged;
-            if (handler != null)
-            {
-                handler(this, new EventArgs());
-            }
+            //CanExecuteChanged(this, new EventArgs());
+            //EventHandler handler = this.CanExecuteChanged;
+            //if (handler != null)
+            //{
+            //    handler(this, new EventArgs());
+            //}
         }
 
         public void Execute(object parameter)

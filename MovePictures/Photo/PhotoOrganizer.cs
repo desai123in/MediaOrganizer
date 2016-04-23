@@ -232,9 +232,9 @@ namespace OrganizeMedia.Photo
             result.Logs = new List<string>();
             result.Errors = new List<string>();
 
-            
+            //Task.Delay(7000).Wait();
             int numFilesCopied = 0;
-
+            //return result;
             foreach (string filePath in fromFiles)
             {
                 var fileName = Path.GetFileName(filePath);

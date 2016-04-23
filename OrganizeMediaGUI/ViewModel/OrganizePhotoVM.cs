@@ -13,8 +13,13 @@ using ReactiveUI;
 
 namespace OrganizeMediaGUI.ViewModel
 {
+    
     public class OrganizePhotoVM:BaseViewModel
     {
+     /****IMP about UI synchronization and calling business/datalayer methods (here by refered to as OM, outside method) asynchronously
+        -you can pass ui collection to OM as long as OM doesn't try to update it
+        
+     ***/
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
                
 
@@ -57,7 +62,7 @@ namespace OrganizeMediaGUI.ViewModel
             get
             {
                 if (findFilesToCopyCommand == null)
-                    findFilesToCopyCommand = new DelegateCommand(GetMediaToCopyAsync);
+                    findFilesToCopyCommand = new DelegateCommand(GetMediaToCopyAsync, CanExecute_GetMedia);
                 return findFilesToCopyCommand;
             }
         }
@@ -68,7 +73,7 @@ namespace OrganizeMediaGUI.ViewModel
             get
             {
                 if (copyAllCommand == null)
-                    copyAllCommand = new DelegateCommand(CopyMediaAsync);
+                    copyAllCommand = new DelegateCommand(CopyMediaAsync, CanExecute_CopyMedia);
                 return copyAllCommand;
             }
         }
@@ -77,6 +82,12 @@ namespace OrganizeMediaGUI.ViewModel
         {
             get { return isCopyExecuting; }
             set { isCopyExecuting = value; Notify("IsCopyExecuting"); }
+        }
+
+        public bool IsGetExecuting
+        {
+            get { return isGetExecuting; }
+            set { isGetExecuting = value; Notify("isGetExecuting"); }
         }
 
         private string searchFolder = string.Empty;
@@ -88,6 +99,7 @@ namespace OrganizeMediaGUI.ViewModel
         private DelegateCommand copyAllCommand;
         private SettingsManager settingsManager = new SettingsManager();
         private bool isCopyExecuting = false;
+        private bool isGetExecuting = false;
 
         public Action<object> BrowseAction;
 
@@ -101,25 +113,45 @@ namespace OrganizeMediaGUI.ViewModel
             FromFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "FromFolder");
             ToFolder = settingsManager.GetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder");
 
+            filesToCopy = new ObservableCollection<string>();
+            //filesToCopy.Add("test1");
+            //filesToCopy.Add("test2");
             //CopyAllCommand = ReactiveCommand.CreateAsyncTask()
             
         }
+
+        private bool CanExecute_CopyMedia(object param)
+        {
+            return (FilesToCopy.Count > 0 && !IsCopyExecuting);
+        }
+
+        private bool CanExecute_GetMedia(object param)
+        {
+            return (!IsCopyExecuting && !IsGetExecuting);
+        }
+
 
         async private void CopyMediaAsync(object param)
         {
             if(FilesToCopy.Count > 0)
             {
                 IsCopyExecuting = true;
+               
                 var res = await CopyMediaAsync(FilesToCopy.ToList<string>(), ToFolder);
                 FilesToCopy.Clear();
+                //back on UI Thread
                 IsCopyExecuting = false;
+
+                //below needed to update button enable/disable otherwise its not enabling sometime without clicking on ui
+                CommandManager.InvalidateRequerySuggested();
             }
             //var res = await CopyMediaAsync
         }
 
         async private void GetMediaToCopyAsync(object param)
         {
-
+            IsGetExecuting = true;
+            FilesToCopy.Clear();
             var res = await GetMediaToCopyAsync(FromFolder, ToFolder);
 
             if (res.Errors != null && res.Errors.Count > 0)
@@ -130,6 +162,9 @@ namespace OrganizeMediaGUI.ViewModel
             {
                 FilesToCopy = new ObservableCollection<string>(res.ResultCollection);
             }
+            IsGetExecuting = false;
+            //below needed to update button enable/disable otherwise its not enabling sometime without clicking on ui
+            CommandManager.InvalidateRequerySuggested();
 
         }
 
@@ -138,8 +173,16 @@ namespace OrganizeMediaGUI.ViewModel
             try
             {
                 IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
-
-                ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => { Task.Delay(5000).Wait(); return new ScalarResult<int>(); });//await Task.FromResult<ScalarResult<int>>(mediaOrganizer.CopyMedia(fromFiles, toFolder));
+                
+                //ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => { Task.Delay(8000).Wait(); return new ScalarResult<int>(); });
+                //ScalarResult<int> res = await TestWait();
+                
+                //ScalarResult<int> res = await Task.FromResult<ScalarResult<int>>(mediaOrganizer.CopyMedia(temp,"test"));
+                //for some reason Task.FromResult runs on UI Thread
+                //also in this method after we get res we don't want to update UI in this method so we should do ConfigureAwait false
+                //till this statement we are on UI Thread, entire CopyMedia method will be executed in worker thread
+                ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => mediaOrganizer.CopyMedia(fromFiles, toFolder)).ConfigureAwait(false);
+                //still on worker thread as ConfigureAwait is false
                 return res;
                 
             }
@@ -153,6 +196,14 @@ namespace OrganizeMediaGUI.ViewModel
 
         }
 
+        //NOT USED
+        //FOR TEST ONLY
+        async private Task<ScalarResult<int>> TestWait()
+        {
+            await Task.Delay(8000); 
+            return new ScalarResult<int>(); 
+        }
+
         
         async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to)
         {
@@ -160,7 +211,7 @@ namespace OrganizeMediaGUI.ViewModel
             {
                 IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
                 mediaOrganizer.SearchFolder = searchFolder;
-                ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetListOfNewMediaMissingInToFolder(from, to));
+                ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetListOfNewMediaMissingInToFolder(from, to)).ConfigureAwait(false);
                     //await Task.Run<ListResult<string>>(() => { Task.Delay(5000).Wait(); return new ListResult<string>(); });
 
                 return res;

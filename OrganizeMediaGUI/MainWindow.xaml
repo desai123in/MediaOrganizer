@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OrganizeMediaGUI.MainWindow"
         xmlns:gif="clr-namespace:XamlAnimatedGif;assembly=XamlAnimatedGif"    
-    Title="MainWindow" Height="598.445" Width="1273.524">
+    Title="Media Organizer" Height="598.445" Width="1273.524">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
@@ -31,7 +31,7 @@
         <Button Content="Get" Command="{Binding FindFilesCopyCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="129,107,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20"/>
         <Button x:Name="btnCopyAll" Command="{Binding CopyAllCommand}" Grid.ColumnSpan="2" Content="Copy All" HorizontalAlignment="Left" Margin="129,438,0,0" Grid.Row="1" VerticalAlignment="Top" Width="100" Height="20"/>
         <Label x:Name="lblCopyAll" Grid.ColumnSpan="2" Content="Copy Log" HorizontalAlignment="Left" Margin="325,432,0,0" Grid.Row="1" VerticalAlignment="Top" Width="440"/>
-        <Image x:Name="ImgGet" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="250,94,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
+        <Image x:Name="ImgGet"  Visibility="{Binding Path=IsGetExecuting, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="250,94,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
         <Image x:Name="ImgCopy" Visibility="{Binding Path=IsCopyExecuting, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="250,432,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
 
     </Grid>
