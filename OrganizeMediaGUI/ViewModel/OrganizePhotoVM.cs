@@ -40,8 +40,12 @@ namespace OrganizeMediaGUI.ViewModel
             set
             {
                 fromFolder = value;
-                Notify("FromFolder");
                 GetMediaCountAsync(fromFolder, (msg) => FromFolderInfo = msg);
+                if(FilesToCopy != null && FilesToCopy.Count > 0)
+                    FilesToCopy.Clear();
+                if (DupFiles != null && DupFiles.Count > 0)
+                    DupFiles.Clear();
+                Notify("FromFolder");
                 //FromFolderInfo =  GetMediaCountAsync(fromFolder);
                 
             }
@@ -50,7 +54,11 @@ namespace OrganizeMediaGUI.ViewModel
         public string ToFolder
         {
             get { return toFolder; }
-            set { toFolder = value; Notify("ToFolder"); GetMediaCountAsync(toFolder, (msg) => ToFolderInfo = msg); }
+            set
+            {
+                toFolder = value; Notify("ToFolder"); GetMediaCountAsync(toFolder, (msg) => ToFolderInfo = msg); if (FilesToCopy != null && FilesToCopy.Count > 0)
+                    FilesToCopy.Clear();
+            }
         }
 
         public ObservableCollection<string> FilesToCopy

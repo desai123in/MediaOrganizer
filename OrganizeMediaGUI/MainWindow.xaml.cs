@@ -67,9 +67,9 @@ namespace OrganizeMediaGUI
             FolderBrowserDialog openFolderDialog = new FolderBrowserDialog();
 
             
-            if(textBox.Name.Contains("Search"))
-                openFolderDialog.RootFolder = Environment.SpecialFolder.MyPictures;
-            else
+            //if(textBox.Name.Contains("Search"))
+            //    openFolderDialog.RootFolder = Environment.SpecialFolder.MyPictures;
+            //else
                 openFolderDialog.RootFolder = Environment.SpecialFolder.MyComputer;
             DialogResult result = openFolderDialog.ShowDialog();
             if(result == System.Windows.Forms.DialogResult.OK)

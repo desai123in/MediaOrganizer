@@ -142,7 +142,7 @@ namespace OrganizeMedia.Photo
                    
                 }
                 Log.InfoFormat("{0} image files found in SearchFolder: {1} from fromFolder: {2}", filesAlreadyExistsInSearchFolder.Count, SearchFolder, fromFolder);
-                result.AddLogFormat("{0} Photos Already Exists In : {1}", filesAlreadyExistsInSearchFolder.Count, SearchFolder, fromFolder);
+                result.AddLogFormat("{0} Photos Already Exists In : {1}", string.Format("{0:n0}", filesAlreadyExistsInSearchFolder.Count), SearchFolder, fromFolder);
 
             }
             catch(Exception e)
@@ -266,7 +266,7 @@ namespace OrganizeMedia.Photo
                     }
                 }
                 Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {2}", filesToMove.Count, fromFolder, toFolder);
-                result.AddLogFormat("{0} new photos found in : {1} that does not exist in : {2}", filesToMove.Count, fromFolder, toFolder);
+                result.AddLogFormat("{0} new photos found in : {1} that does not exist in : {2}", string.Format("{0:n0}", filesToMove.Count), fromFolder, toFolder);
 
                 //following code is for verification
 
