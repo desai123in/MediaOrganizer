@@ -18,13 +18,13 @@
         </Grid.RowDefinitions>
         <Label x:Name="lblSearchFolder" Content="Duplicate Search Folder:" HorizontalAlignment="Right" Margin="0,25,249,0" VerticalAlignment="Top" Grid.Column="2" Height="26" Width="138" Grid.Row="1"/>
         <TextBox x:Name="txtSearchFolder" Text="{Binding SearchFolder}" HorizontalAlignment="Right" Height="23" Margin="0,25,10,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="234" Grid.Column="2" Grid.Row="1"/>
-        <Label x:Name="lblFromFolder" Content="From Folder:" HorizontalAlignment="Left" Margin="33,32,0,0" VerticalAlignment="Top" Width="84" Grid.ColumnSpan="2" Height="26" Grid.Row="1"/>
+        <Label x:Name="lblFromFolder" Content="From Folder:" HorizontalAlignment="Left" Margin="45,30,0,0" VerticalAlignment="Top" Width="84" Grid.ColumnSpan="2" Height="26" Grid.Row="1"/>
         <TextBox x:Name="txtFromFolder" Text="{Binding FromFolder}" HorizontalAlignment="Left" Height="23" Margin="129,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="258" Grid.ColumnSpan="2" Grid.Row="1"/>
         <Label x:Name="lblToFolder" Content="To Folder:" HorizontalAlignment="Left" Margin="498,29,0,0" VerticalAlignment="Top" Width="84" Grid.ColumnSpan="2" Height="26" Grid.Row="1"/>
         <TextBox x:Name="txtToFolder" Text="{Binding ToFolder}" HorizontalAlignment="Left" Height="23" Margin="565,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="258" Grid.ColumnSpan="2" Grid.Row="1"/>
         <Button x:Name="btnFromFolder" Command="{Binding BrowseCommand}"  CommandParameter="{Binding ElementName=txtFromFolder}" Content="Browse" HorizontalAlignment="Left" Margin="406,32,0,0" VerticalAlignment="Top" Width="43" Grid.Column="1" Height="20" Grid.Row="1"/>
         <Button x:Name="btnToFolder" Command="{Binding BrowseCommand}"   CommandParameter="{Binding ElementName=txtToFolder}" Content="Browse" HorizontalAlignment="Left" Margin="844,32,0,0" VerticalAlignment="Top" Width="43" Grid.Column="1" Height="20" Grid.Row="1"/>
-        <Button x:Name="btnSearchFolder" Command="{Binding BrowseCommand}" CommandParameter="{Binding ElementName=txtSearchFolder}" Content="Browse" HorizontalAlignment="Right" Margin="0,53,201,0" VerticalAlignment="Top" Width="43" Grid.Column="2" Height="20" Grid.Row="1"/>
+        <Button x:Name="btnSearchFolder" Command="{Binding BrowseCommand}" CommandParameter="{Binding ElementName=txtSearchFolder}" Content="Browse" HorizontalAlignment="Right" Margin="0,50,10,0" VerticalAlignment="Top" Width="43" Grid.Column="1" Height="20" Grid.Row="1"/>
         <ListBox x:Name="lstToCopy" ItemsSource="{Binding FilesToCopy}" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" SelectionMode="Multiple"/>
         <Label x:Name="lblToMove" Content="Photos To Move:" HorizontalAlignment="Left" Margin="441,101,0,0" VerticalAlignment="Top" Width="104" Height="26" Grid.Row="1" Grid.Column="1"/>
         <Button Content="Get" Command="{Binding FindFilesCopyCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="129,107,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20"/>
@@ -36,6 +36,9 @@
         <Label x:Name="lblDups" Content="Exists in Search Folder:" HorizontalAlignment="Left" Margin="932,101,0,0" VerticalAlignment="Top" Width="145" Height="26" Grid.Row="1" Grid.Column="1"/>
         <Image x:Name="ImgDups"  Visibility="{Binding IsGetExecuting, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="1082,94,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
         <CheckBox IsChecked="{Binding Path=ExcludeSearchFolderDups}" Grid.ColumnSpan="2" Content="Exclude SearchFolder Photos" HorizontalAlignment="Left" Margin="250,438,0,0" Grid.Row="1" VerticalAlignment="Top" Height="20" Width="176"/>
+        <Label x:Name="lblFromInfo" Grid.ColumnSpan="2" Content="{Binding Path=FromFolderInfo}" HorizontalAlignment="Left" Margin="129,53,0,0" Grid.Row="1" VerticalAlignment="Top" Width="258"/>
+        <Label x:Name="lblToInfo" Grid.ColumnSpan="2" Content="{Binding Path=ToFolderInfo}" HorizontalAlignment="Left" Margin="565,55,0,0" Grid.Row="1" VerticalAlignment="Top" Width="258"/>
+        <Label x:Name="lblSearchInfo" Grid.ColumnSpan="2" Content="{Binding Path=SearchFolderInfo}" HorizontalAlignment="Left" Margin="1046,50,0,0" Grid.Row="1" VerticalAlignment="Top" Width="173"/>
 
     </Grid>
 </Window>

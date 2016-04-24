@@ -13,34 +13,46 @@ using ReactiveUI;
 
 namespace OrganizeMediaGUI.ViewModel
 {
-    
-    public class OrganizePhotoVM:BaseViewModel
+
+    public class OrganizePhotoVM : BaseViewModel
     {
-     /****IMP about UI synchronization and calling business/datalayer methods (here by refered to as OM, outside method) asynchronously
-        -you can pass ui collection to OM as long as OM doesn't try to update it
+        /****IMP about UI synchronization and calling business/datalayer methods (here by refered to as OM, outside method) asynchronously
+           -you can pass ui collection to OM as long as OM doesn't try to update it
         
-     ***/
+        ***/
         private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
-               
+
 
         public string SearchFolder
         {
             get { return searchFolder; }
-            set { searchFolder = value; Notify("SearchFolder"); }
+            set
+            {
+                searchFolder = value;
+                Notify("SearchFolder");
+                GetMediaCountAsync(searchFolder, (msg) => SearchFolderInfo = msg);
+            }
         }
-       
+
         public string FromFolder
         {
             get { return fromFolder; }
-            set { fromFolder = value; Notify("FromFolder"); }
+            set
+            {
+                fromFolder = value;
+                Notify("FromFolder");
+                GetMediaCountAsync(fromFolder, (msg) => FromFolderInfo = msg);
+                //FromFolderInfo =  GetMediaCountAsync(fromFolder);
+                
+            }
         }
-        
+
         public string ToFolder
         {
             get { return toFolder; }
-            set { toFolder = value; Notify("ToFolder"); }
+            set { toFolder = value; Notify("ToFolder"); GetMediaCountAsync(toFolder, (msg) => ToFolderInfo = msg); }
         }
-              
+
         public ObservableCollection<string> FilesToCopy
         {
             get { return filesToCopy; }
@@ -61,11 +73,12 @@ namespace OrganizeMediaGUI.ViewModel
 
         public DelegateCommand BrowseCommand
         {
-            get {
+            get
+            {
                 if (browseCommand == null)
                     browseCommand = new DelegateCommand(BrowseAction);
-                    return browseCommand; 
-                }            
+                return browseCommand;
+            }
         }
 
         public DelegateCommand FindFilesCopyCommand
@@ -78,7 +91,7 @@ namespace OrganizeMediaGUI.ViewModel
             }
         }
 
-       // public ReactiveCommand<ScalarResult<int>> CopyAllCommand { get; set; }
+        // public ReactiveCommand<ScalarResult<int>> CopyAllCommand { get; set; }
         public DelegateCommand CopyAllCommand
         {
             get
@@ -101,6 +114,24 @@ namespace OrganizeMediaGUI.ViewModel
             set { isGetExecuting = value; Notify("isGetExecuting"); }
         }
 
+        public string FromFolderInfo
+        {
+            get { return fromFolderInfo; }
+            set { fromFolderInfo = value; Notify("FromFolderInfo"); }
+        }
+
+        public string ToFolderInfo
+        {
+            get { return toFolderInfo; }
+            set { toFolderInfo = value; Notify("ToFolderInfo"); }
+        }
+
+        public string SearchFolderInfo
+        {
+            get { return searchFolderInfo; }
+            set { searchFolderInfo = value; Notify("SearchFolderInfo"); }
+        }
+
         public string Logs { get { return logs; } set { logs = value; Notify("Logs"); } }
 
         private string searchFolder = string.Empty;
@@ -116,10 +147,14 @@ namespace OrganizeMediaGUI.ViewModel
         private bool isGetExecuting = false;
         private string logs = string.Empty;
         private bool excludeSearchFolderDups;
+        private string fromFolderInfo = string.Empty;
+        private string toFolderInfo = string.Empty;
+        private string searchFolderInfo = string.Empty;
+
 
         public Action<object> BrowseAction;
 
-        
+
 
         public OrganizePhotoVM()
         {
@@ -134,7 +169,7 @@ namespace OrganizeMediaGUI.ViewModel
             //filesToCopy.Add("test1");
             //filesToCopy.Add("test2");
             //CopyAllCommand = ReactiveCommand.CreateAsyncTask()
-            
+
         }
 
         private bool CanExecute_CopyMedia(object param)
@@ -150,13 +185,13 @@ namespace OrganizeMediaGUI.ViewModel
 
         async private void CopyMediaAsync(object param)
         {
-            
-            if(FilesToCopy.Count > 0)
+
+            if (FilesToCopy.Count > 0)
             {
                 var lFilesToCopy = FilesToCopy.ToList<string>();
                 IsCopyExecuting = true;
-               
-                if(ExcludeSearchFolderDups)
+
+                if (ExcludeSearchFolderDups)
                 {
                     lFilesToCopy.RemoveAll(f => DupFiles.Contains(f));
                 }
@@ -207,15 +242,56 @@ namespace OrganizeMediaGUI.ViewModel
 
         }
 
+        async private void GetMediaCountAsync(object folder,Action<string> setMsg )
+        {
+            ScalarResult<int> res = await GetMediaCountAsync((string)folder);
+            string msg = string.Empty;
+
+            if (res.Errors != null && res.Errors.Count > 0)
+            {
+                msg = res.Errors[0];
+            }
+            else
+            {
+                msg = string.Format("{0} Photos.",string.Format("{0:n0}", res.ResultValue));
+                //Logs = FormatLogString(res.Logs);
+            }
+
+            if(setMsg != null)
+            {
+                setMsg(msg);
+            }
+        }
+
+
+        async private Task<ScalarResult<int>> GetMediaCountAsync(string folder)
+        {
+            try
+            {
+                IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
+                ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => mediaOrganizer.GetMediaCount(folder)).ConfigureAwait(false);
+                //still on worker thread as ConfigureAwait is false
+                return res;
+
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                ScalarResult<int> emptyRes = new ScalarResult<int>();
+                emptyRes.Errors.Add("Failed To Copy new media");
+                return emptyRes;
+            }
+        }
+
         async private Task<ScalarResult<int>> CopyMediaAsync(IList<string> fromFiles, string toFolder)
         {
             try
             {
                 IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
-                
+
                 //ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => { Task.Delay(8000).Wait(); return new ScalarResult<int>(); });
                 //ScalarResult<int> res = await TestWait();
-                
+
                 //ScalarResult<int> res = await Task.FromResult<ScalarResult<int>>(mediaOrganizer.CopyMedia(temp,"test"));
                 //for some reason Task.FromResult runs on UI Thread
                 //also in this method after we get res we don't want to update UI in this method so we should do ConfigureAwait false
@@ -223,7 +299,7 @@ namespace OrganizeMediaGUI.ViewModel
                 ScalarResult<int> res = await Task.Run<ScalarResult<int>>(() => mediaOrganizer.CopyMedia(fromFiles, toFolder)).ConfigureAwait(false);
                 //still on worker thread as ConfigureAwait is false
                 return res;
-                
+
             }
             catch (Exception e)
             {
@@ -239,17 +315,17 @@ namespace OrganizeMediaGUI.ViewModel
         //FOR TEST ONLY
         async private Task<ScalarResult<int>> TestWait()
         {
-            await Task.Delay(8000); 
-            return new ScalarResult<int>(); 
+            await Task.Delay(8000);
+            return new ScalarResult<int>();
         }
 
-        async private Task<ListResult<string>> GetDuplicateMediaAsync(string from,string searchFolder)
+        async private Task<ListResult<string>> GetDuplicateMediaAsync(string from, string searchFolder)
         {
             try
             {
                 IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
                 mediaOrganizer.SearchFolder = searchFolder;
-               ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetDups(from,null)).ConfigureAwait(false);
+                ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetDups(from, null)).ConfigureAwait(false);
                 //await Task.Run<ListResult<string>>(() => { Task.Delay(5000).Wait(); return new ListResult<string>(); });
 
                 return res;
@@ -263,18 +339,18 @@ namespace OrganizeMediaGUI.ViewModel
 
             }
         }
-        async private Task<ListResult<string>> GetMediaToCopyAsync(string from,string to)
+        async private Task<ListResult<string>> GetMediaToCopyAsync(string from, string to)
         {
             try
             {
                 IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
                 mediaOrganizer.SearchFolder = searchFolder;
                 ListResult<string> res = await Task.Run<ListResult<string>>(() => mediaOrganizer.GetListOfNewMediaMissingInToFolder(from, to)).ConfigureAwait(false);
-                    //await Task.Run<ListResult<string>>(() => { Task.Delay(5000).Wait(); return new ListResult<string>(); });
+                //await Task.Run<ListResult<string>>(() => { Task.Delay(5000).Wait(); return new ListResult<string>(); });
 
                 return res;
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Log.Error(e);
                 ListResult<string> emptyRes = new ListResult<string>();
@@ -288,19 +364,19 @@ namespace OrganizeMediaGUI.ViewModel
         private string FormatLogString(IList<string> values)
         {
             StringBuilder sb = new StringBuilder();
-            if(!string.IsNullOrEmpty(Logs))
+            if (!string.IsNullOrEmpty(Logs))
             {
                 sb.Append(Logs);
             }
-            
-            foreach(string s in values)
+
+            foreach (string s in values)
             {
                 sb.AppendLine(s);
             }
             return sb.ToString();
         }
 
-        
+
         //private async Task<ListResult<string>> GetListOfNewMediaMissingInToFolder(string fromFolder,string toFolder)
         //{
         //    try
@@ -308,7 +384,7 @@ namespace OrganizeMediaGUI.ViewModel
         //        IMediaOrganizer mediaOrganizer = new PhotoOrganizer();
 
         //        ListResult<string> res = await Task.FromResult<ListResult<string>>(mediaOrganizer.GetListOfNewMediaMissingInToFolder(fromFolder, toFolder));   
-                
+
 
 
         //    }
@@ -324,10 +400,10 @@ namespace OrganizeMediaGUI.ViewModel
             //save settings            
             settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "SearchFolder", SearchFolder);
             settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "FromFolder", FromFolder);
-            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder", ToFolder); 
+            settingsManager.SetSettingValue(Screen.OrganizePhotoScreenName, "ToFolder", ToFolder);
         }
     }
 
 
-   
+
 }

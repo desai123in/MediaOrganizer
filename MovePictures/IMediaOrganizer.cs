@@ -13,6 +13,7 @@ namespace OrganizeMedia
         ListResult<string> GetListOfNewMediaMissingInToFolder(string fromFolder, string toFolder);
         ListResult<string> GetDups(string fromFolder, IList<string> ignoreFolders);
         ScalarResult<int> CopyMedia(IList<string> fromFiles, string toFolder);
+        ScalarResult<int> GetMediaCount(string folder);
     }
 
     public abstract class Result

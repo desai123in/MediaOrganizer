@@ -37,5 +37,11 @@ namespace OrganizeMedia.Photo
                 throw new NotImplementedException();
             }
         }
+
+
+        public ScalarResult<int> GetMediaCount(string folder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

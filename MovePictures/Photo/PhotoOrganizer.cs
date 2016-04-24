@@ -34,6 +34,27 @@ namespace OrganizeMedia.Photo
             }
         }
 
+        public ScalarResult<int> GetMediaCount(string folder)
+        {
+            ScalarResult<int> result = new ScalarResult<int>();
+            result.Errors = new List<string>();
+            result.Logs = new List<string>();
+
+            try
+            {
+                var filesInfo = GetFilesInfoFromFolder(folder);
+                result.ResultValue = filesInfo.Count();
+
+                Log.InfoFormat("Count in folder: {0} = {1}", folder, result.ResultValue);
+            }
+            catch ( Exception e)
+            {
+                Log.Error(e);
+                result.AddErrorFormat("Failed to get photo count, Error: {0}", e.Message);
+            }
+            return result;
+        }
+
         /// <summary>
         /// get images already exist in SearchFolder
         /// todo: take ignore folders into account
@@ -245,7 +266,7 @@ namespace OrganizeMedia.Photo
                     }
                 }
                 Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {2}", filesToMove.Count, fromFolder, toFolder);
-                result.AddLogFormat("{0} new photos found in : {1} which does not exist in : {2}", filesToMove.Count, fromFolder, toFolder);
+                result.AddLogFormat("{0} new photos found in : {1} that does not exist in : {2}", filesToMove.Count, fromFolder, toFolder);
 
                 //following code is for verification
 
