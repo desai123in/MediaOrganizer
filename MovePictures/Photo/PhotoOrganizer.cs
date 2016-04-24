@@ -114,10 +114,9 @@ namespace OrganizeMedia.Photo
                     var key = GetFileKey(path);
 
                     var existingToPath = string.Empty;
-                    if (!uniqSearchFolderFiles.TryGetValue(key, out existingToPath))
+                    if (uniqSearchFolderFiles.TryGetValue(key, out existingToPath))
                     {
-                        filesAlreadyExistsInSearchFolder.Add(path);
-                        
+                        filesAlreadyExistsInSearchFolder.Add(path);                        
                     }
                    
                 }
@@ -246,7 +245,7 @@ namespace OrganizeMedia.Photo
                     }
                 }
                 Log.InfoFormat("{0} new image files found in fromFolder: {1} which does not exist in toFolder: {2}", filesToMove.Count, fromFolder, toFolder);
-                result.AddLogFormat("{0} new image files found in : {1} which does not exist in : {2}", filesToMove.Count, fromFolder, toFolder);
+                result.AddLogFormat("{0} new photos found in : {1} which does not exist in : {2}", filesToMove.Count, fromFolder, toFolder);
 
                 //following code is for verification
 
