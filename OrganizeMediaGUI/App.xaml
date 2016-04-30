@@ -4,7 +4,7 @@
          
     <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Themes\ExpressionDark.xaml" />
+                <!--<ResourceDictionary Source="Themes\ExpressionDark.xaml" />-->
                 <!--
                 <ResourceDictionary Source="Themes\BureauBlue.xaml" />
                 <ResourceDictionary Source="Themes\BureauBlack.xaml" />     

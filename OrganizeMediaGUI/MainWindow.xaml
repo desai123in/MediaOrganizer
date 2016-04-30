@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OrganizeMediaGUI.MainWindow"
         xmlns:gif="clr-namespace:XamlAnimatedGif;assembly=XamlAnimatedGif"    
+     xmlns:vwp="clr-namespace:CodePlex.VirtualizingWrapPanel;assembly=VirtualizingWrapPanel"
     Title="Media Organizer" Height="680.534" Width="1273.524" Background="#FFD9EDF1">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -25,7 +26,29 @@
         <Button x:Name="btnFromFolder" Command="{Binding BrowseCommand}"  CommandParameter="{Binding ElementName=txtFromFolder}" Content="Browse" HorizontalAlignment="Left" Margin="406,32,0,0" VerticalAlignment="Top" Width="43" Grid.Column="1" Height="20" Grid.Row="1"/>
         <Button x:Name="btnToFolder" Command="{Binding BrowseCommand}"   CommandParameter="{Binding ElementName=txtToFolder}" Content="Browse" HorizontalAlignment="Left" Margin="844,32,0,0" VerticalAlignment="Top" Width="43" Grid.Column="1" Height="20" Grid.Row="1"/>
         <Button x:Name="btnSearchFolder" Command="{Binding BrowseCommand}" CommandParameter="{Binding ElementName=txtSearchFolder}" Content="Browse" HorizontalAlignment="Right" Margin="0,50,10,0" VerticalAlignment="Top" Width="43" Grid.Column="1" Height="20" Grid.Row="1"/>
-        <ListBox x:Name="lstToCopy" ItemsSource="{Binding FilesToCopy}" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" SelectionMode="Multiple"/>
+        <!--<ListBox x:Name="lstToCopy" ItemsSource="{Binding FilesToCopy}" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" SelectionMode="Multiple"/>-->
+        <ListBox ItemsSource="{Binding FilesToCopy}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" >
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <!--<WrapPanel IsItemsHost="True" Orientation="Horizontal"  />-->
+                    <vwp:VirtualizingWrapPanel />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical">
+                        <Image  Width="100" Height="100" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="100" DecodePixelHeight="100" UriSource="{Binding}" />
+                            </Image.Source>
+                        </Image>
+                        <Label Content="{Binding}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            
+        </ListBox>
+        <!--<ListBox x:Name="lstToCopy" ItemsSource="{Binding FilesToCopy}" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" SelectionMode="Multiple"/>-->
         <Label x:Name="lblToMove" Content="Photos To Move:" HorizontalAlignment="Left" Margin="441,101,0,0" VerticalAlignment="Top" Width="104" Height="26" Grid.Row="1" Grid.Column="1"/>
         <Button Content="Get" Command="{Binding FindFilesCopyCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="129,107,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20"/>
         <Button x:Name="btnCopyAll" Command="{Binding CopyAllCommand}" Grid.ColumnSpan="2" Content="Copy All" HorizontalAlignment="Left" Margin="129,438,0,0" Grid.Row="1" VerticalAlignment="Top" Width="100" Height="20"/>
