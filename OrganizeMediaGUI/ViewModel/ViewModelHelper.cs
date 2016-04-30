@@ -1,13 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace OrganizeMediaGUI.ViewModel
 {
+
     public class BaseViewModel:INotifyPropertyChanged
     {
         static BaseViewModel()
@@ -94,6 +98,40 @@ namespace OrganizeMediaGUI.ViewModel
         {
             if(executeAction != null)
                 this.executeAction(parameter);
+        }
+    }
+
+    public class FileNameToFilePropertiesConverter : IValueConverter
+    {
+        private static readonly log4net.ILog Log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
+        public object Convert(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            try
+            {
+
+                var file = new FileInfo((string)value);
+                var fileModifedDateTime = file.LastWriteTime.ToString("MM/dd/yy", CultureInfo.InvariantCulture);
+
+                var fileSize = String.Format("{0:N0}KB", (file.Length / 1024f));
+                
+                var key = string.Format("{0}_[{1}]", fileModifedDateTime, fileSize);
+
+                return key;
+            }
+            catch(Exception e)
+            {
+                Log.Error(e);
+                return value;
+            }
+           
+        }
+
+        public object ConvertBack(object value, Type targetType,
+            object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
         }
     }
 }

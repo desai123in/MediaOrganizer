@@ -3,10 +3,12 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" mc:Ignorable="d" x:Class="OrganizeMediaGUI.MainWindow"
         xmlns:gif="clr-namespace:XamlAnimatedGif;assembly=XamlAnimatedGif"    
-     xmlns:vwp="clr-namespace:CodePlex.VirtualizingWrapPanel;assembly=VirtualizingWrapPanel"
+    xmlns:fileProp="clr-namespace:OrganizeMediaGUI.ViewModel"
+     xmlns:vwp="clr-namespace:OrganizeMediaGUI.Controls"
     Title="Media Organizer" Height="680.534" Width="1273.524" Background="#FFD9EDF1">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <fileProp:FileNameToFilePropertiesConverter x:Key="MediaPropertiesconverter" />
     </Window.Resources>
     <Grid Margin="-24,0,0,0" Height="524" VerticalAlignment="Top">
         <Grid.ColumnDefinitions>
@@ -30,8 +32,8 @@
         <ListBox ItemsSource="{Binding FilesToCopy}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" >
             <ListBox.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <!--<WrapPanel IsItemsHost="True" Orientation="Horizontal"  />-->
-                    <vwp:VirtualizingWrapPanel />
+                    <!--<WrapPanel IsItemsHost="True" Orientation="Horizontal"  />-->                  
+                    <vwp:VirtualizingWrapPanel/>
                 </ItemsPanelTemplate>
             </ListBox.ItemsPanel>
             <ListBox.ItemTemplate>
@@ -42,20 +44,41 @@
                                 <BitmapImage DecodePixelWidth="100" DecodePixelHeight="100" UriSource="{Binding}" />
                             </Image.Source>
                         </Image>
-                        <Label Content="{Binding}"/>
+                        <Label FontSize="10" FontWeight="Bold" Content="{Binding  Converter={StaticResource MediaPropertiesconverter}}"/>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
             
         </ListBox>
         <!--<ListBox x:Name="lstToCopy" ItemsSource="{Binding FilesToCopy}" Grid.Column="1" HorizontalAlignment="Left" Height="293" Margin="129,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="738" SelectionMode="Multiple"/>-->
-        <Label x:Name="lblToMove" Content="Photos To Move:" HorizontalAlignment="Left" Margin="441,101,0,0" VerticalAlignment="Top" Width="104" Height="26" Grid.Row="1" Grid.Column="1"/>
+        <Label x:Name="lblToMove" Content="Photos To Copy:" HorizontalAlignment="Left" Margin="441,101,0,0" VerticalAlignment="Top" Width="104" Height="26" Grid.Row="1" Grid.Column="1"/>
         <Button Content="Get" Command="{Binding FindFilesCopyCommand}" Grid.Column="1" HorizontalAlignment="Left" Margin="129,107,0,0" Grid.Row="1" VerticalAlignment="Top" Width="75" Height="20"/>
         <Button x:Name="btnCopyAll" Command="{Binding CopyAllCommand}" Grid.ColumnSpan="2" Content="Copy All" HorizontalAlignment="Left" Margin="129,438,0,0" Grid.Row="1" VerticalAlignment="Top" Width="100" Height="20"/>
         <Label x:Name="lblLog" Content="{Binding Path=Logs}" Grid.ColumnSpan="3" HorizontalAlignment="Left" Margin="129,511,0,-107" Grid.Row="1" VerticalAlignment="Top" Width="1151" Height="77"/>
         <Image x:Name="ImgGet"   Visibility="{Binding Path=IsGetExecuting, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="250,94,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
         <Image x:Name="ImgCopy" Visibility="{Binding Path=IsCopyExecuting, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="469,433,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
-        <ListBox x:Name="lstDups" ItemsSource="{Binding DupFiles}"  Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="293" Margin="932,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="331"/>
+        <!--<ListBox x:Name="lstDups" ItemsSource="{Binding DupFiles}"  Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="293" Margin="932,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="331"/>-->
+        <ListBox ItemsSource="{Binding DupFiles}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="293" Margin="932,132,0,0" Grid.Row="1" VerticalAlignment="Top" Width="331" >
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <!--<WrapPanel IsItemsHost="True" Orientation="Horizontal"  />-->
+                    <vwp:VirtualizingWrapPanel/>
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical">
+                        <Image  Width="80" Height="80" HorizontalAlignment="Center">
+                            <Image.Source>
+                                <BitmapImage DecodePixelWidth="80" DecodePixelHeight="80" UriSource="{Binding}" />
+                            </Image.Source>
+                        </Image>
+                        <Label FontSize="10" Content="{Binding  Converter={StaticResource MediaPropertiesconverter}}"/>
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
         <Label x:Name="lblDups" Content="Exists in Search Folder:" HorizontalAlignment="Left" Margin="932,101,0,0" VerticalAlignment="Top" Width="173" Height="26" Grid.Row="1" Grid.Column="1"/>
         <Image x:Name="ImgDups"  Visibility="{Binding IsGetExecuting, Converter={StaticResource BoolToVis}}" Grid.ColumnSpan="2" HorizontalAlignment="Left" Height="38" Margin="1112,94,0,0" Grid.Row="1" VerticalAlignment="Top" Width="48" RenderTransformOrigin="0.651,0.207" gif:AnimationBehavior.SourceUri="Images/spinner.gif"/>
         <CheckBox IsChecked="{Binding Path=ExcludeSearchFolderDups}" Grid.ColumnSpan="2" Content="Exclude SearchFolder Photos" HorizontalAlignment="Left" Margin="250,438,0,0" Grid.Row="1" VerticalAlignment="Top" Height="20" Width="176"/>

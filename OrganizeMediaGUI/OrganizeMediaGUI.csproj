@@ -72,9 +72,6 @@
     <Reference Include="System.Xaml">
       <RequiredTargetFramework>4.0</RequiredTargetFramework>
     </Reference>
-    <Reference Include="VirtualizingWrapPanel">
-      <HintPath>..\..\..\Downloads\VirtualizingWrapPanel\VirtualizingWrapPanel\VirtualizingWrapPanel.dll</HintPath>
-    </Reference>
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -87,6 +84,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\VirtualizingWrapPanel.cs" />
     <Compile Include="UserSettings\Screen.cs" />
     <Compile Include="UserSettings\Setting.cs" />
     <Compile Include="UserSettings\Settings.cs" />
